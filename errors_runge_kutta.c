@@ -42,7 +42,7 @@ int main() {
     double data1[NUM_STEPS], data2[NUM_STEPS], error[NUM_STEPS];
 
     // Read column 2 from two files
-    read_column("runge_kutta_2_data.txt", data1);
+    read_column("euler_data_x.txt", data1);
     read_column("runge_kutta_4_data.txt", data2);
 
     // Calculate the error between the two datasets

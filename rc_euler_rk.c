@@ -8,7 +8,9 @@
 
 
 double derivative(double u);
+void euler(double t[], double u[]);
 void rk4(double t[], double u[]);
+
 void gnu_plt();
 
 int main(){
@@ -20,7 +22,9 @@ int main(){
     u[0] = 0.0; 
 
     rk4(t, u); 
-    // gnu_plt();
+
+    euler(t,u);
+    gnu_plt();
 
     return 0; 
 }
@@ -30,6 +34,22 @@ double derivative(double u){
     return (E-u)/tau; 
 }
 
+void euler(double t[], double u[]){
+    FILE *fp_euler = NULL;
+    fp_euler = fopen("euler_data_x.txt","w");
+    if(fp_euler == NULL){
+
+        printf("Error opening the file");
+        return; 
+    }
+
+    for (int i = 0; i < NUM_STEPS; i++){
+        printf("t_eu[ %d] = %lf, u_eu[%d] = %lf \n", i, t[i], i, u[i]);
+        fprintf(fp_euler, "%lf\t%lf\n", t[i], u[i]);
+        u[i+1] = u[i] + DT*derivative(u[i]);
+        t[i+1] = t[i] + DT; 
+    }
+}
 
 void rk4(double t[], double u[]){
     double u_next; 
@@ -82,7 +102,8 @@ void gnu_plt(){
     fprintf(gnuplotPipe, "set label 'RK3 method' at 3, 3\n");
 
 
-    fprintf(gnuplotPipe, "plot 'runge_kutta_4_data_x.txt' using 1:2 with lines linewidth 2 linecolor rgb 'red'\n");
+    // fprintf(gnuplotPipe, "plot 'runge_kutta_4_data_x.txt' using 1:2 with lines linewidth 4 linecolor rgb 'red'\n");
+    fprintf(gnuplotPipe, "plot 'euler_data_x.txt' using 1:2 with lines linewidth 2 linecolor rgb 'blue'\n");
 
     fflush(gnuplotPipe);
     fprintf(gnuplotPipe, "exit\n");

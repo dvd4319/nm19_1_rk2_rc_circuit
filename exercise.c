@@ -1,90 +1,106 @@
 #include <stdio.h>
-#define R         1000.0    // resistance R [Ohms]
-#define C         0.001     // capacitance C [F]
-#define E         5.0       // constant input voltage E [V] 
-#define DT        0.01      // time step
-#define NUM_STEPS 500       // number of steps
 
+#define E 5.0
+#define C 0.001 
+#define R 100.0 
+#define DT 0.001
+#define NUM_STEPS 500 
 
 double derivative(double u);
-void runge_kutta_2(double t[], double u[]); 
-void gnu_plot(); 
-
+void euler(double t[], double u[]);
+void rk4(double t[], double u[]);
+void gnu_plt();
 
 int main(){
 
-    double t[NUM_STEPS]; // array for time
-    double u[NUM_STEPS]; // array for voltage
+    double t_euler[NUM_STEPS];
+    double u_euler[NUM_STEPS];
 
-    t[0] = 0.0;  // initial time
-    u[0] = 0.0;  // initial voltage across the capacitor
+    double t_rk4[NUM_STEPS];
+    double u_rk4[NUM_STEPS];
 
-    printf("Applying the Runge-Kutta method to the RC circuit with constant input voltage E = %.2f V\n", E);
+    t_euler[0] = t_rk4[0] = 0.0; 
+    u_euler[0] = u_rk4[0] = 0.0; 
 
-    runge_kutta_2(t,u); 
-    gnu_plot(); 
-
-
+    rk4(t_rk4, u_rk4); 
+    euler(t_euler, u_euler);
+    gnu_plt();
 
     return 0; 
 }
 
-double derivative(double u) {
+double derivative(double u){
     double tau = R*C; 
-    return (E - u) / tau; // differential equation of the RC circuit
+    return (E-u)/tau; 
 }
 
-// Runge-Kutta method of second order for solving the differential equation
-void runge_kutta_2(double t[], double u[]){
-
-    FILE *fp = NULL; 
-    fp = fopen("runge_kutta_2_data.txt", "w");
-    if (fp == NULL){
+void euler(double t[], double u[]){
+    FILE *fp_euler = NULL;
+    fp_euler = fopen("euler_data_x.txt","w");
+    if(fp_euler == NULL){
         printf("Error opening the file");
         return; 
     }
 
-    double u_next; 
-    double k1, k2; 
-
     for (int i = 0; i < NUM_STEPS; i++){
+        printf("t_eu[%d] = %lf, u_eu[%d] = %lf \n", i, t[i], i, u[i]);
+        fprintf(fp_euler, "%lf\t%lf\n", t[i], u[i]);
+        if (i < NUM_STEPS - 1) {
+            u[i+1] = u[i] + DT*derivative(u[i]);
+            t[i+1] = t[i] + DT; 
+        }
+    }
 
+    fclose(fp_euler);
+}
+
+void rk4(double t[], double u[]){
+    double u_next; 
+    FILE *fp = NULL; 
+    fp = fopen("runge_kutta_4_data_x.txt", "w");
+    if(fp == NULL){
+        printf("Error opening the file");
+        return; 
+    }
+
+    for(int i = 0; i < NUM_STEPS; i++){
         printf("t[%d] = %lf, u[%d] = %lf \n", i, t[i], i, u[i]);
-        fprintf(fp, "%lf \t %lf \n", t[i], u[i]); 
+        fprintf(fp, "%lf \t %lf \n", t[i], u[i]);
 
-        k1 = DT*derivative(u[i]);
-        k2 = DT*derivative(u[i]+k1); // in derivative function  there are no h in this particular
+        double k1 = DT*derivative(u[i]);
+        double k2 = DT*derivative(u[i]+0.5*k1);
+        double k3 = DT*derivative(u[i]+0.5*k2);
+        double k4 = DT*derivative(u[i]+k3); 
 
-        u_next = u[i] + 0.5*(k1+k2);
-        t[i+1] = t[i]+ DT;
-        u[i+1] = u_next;   
+        u_next = u[i] + (1.0/6.0)*(k1+2*k2+2*k3+k4);
+        if (i < NUM_STEPS - 1) {
+            t[i+1] = t[i] + DT; 
+            u[i+1] = u_next;  
+        }
     }
 
     fclose(fp);
 }
 
-void gnu_plot(){
-    // ======== GNU PLOT ======================== // 
-
+void gnu_plt(){
     FILE  *gnuplotPipe = NULL; 
-    gnuplotPipe = popen("gnuplot -persist", "w");
+
+    gnuplotPipe = popen("gnuplot -persist","w");
 
     if(gnuplotPipe == NULL){
-        printf("Error opening GNUPLOT");
-        return; 
+        printf("Error opening GNU PLOT");
+        return;
     }
 
-
-
     fprintf(gnuplotPipe, "set terminal png\n");
-    fprintf(gnuplotPipe, "set output 'rc_rk2_plot_x.png'\n");
+    fprintf(gnuplotPipe, "set output 'rc_rk4_plot_x.png'\n");
     fprintf(gnuplotPipe, "set grid\n");
     fprintf(gnuplotPipe, "set title 'Behaviour of voltage across the capacitor '\n");
-    fprintf(gnuplotPipe, "set xlabel 't [s]'\n");
-    fprintf(gnuplotPipe, "set ylabel 'u_C [V]'\n");
-    fprintf(gnuplotPipe, "set label 'RK2 method' at 3, 3\n");
+    fprintf(gnuplotPipe, "set xlabel 't[s]'\n");
+    fprintf(gnuplotPipe, "set ylabel 'u_C[V]'\n");
 
-    fprintf(gnuplotPipe, "plot 'runge_kutta_2_data.txt' using 1:2 with lines linewidth 2 linecolor rgb 'green'\n"); 
+    fprintf(gnuplotPipe, "plot 'euler_data_x.txt' using 1:2 with lines linewidth 2 linecolor rgb 'blue' title 'Euler Method',");
+    fprintf(gnuplotPipe, "'runge_kutta_4_data_x.txt' using 1:2 with lines linewidth 2 linecolor rgb 'red' title 'RK4 Method'\n");
 
     fflush(gnuplotPipe);
     fprintf(gnuplotPipe, "exit\n");
