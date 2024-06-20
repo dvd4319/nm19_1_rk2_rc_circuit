@@ -13,7 +13,7 @@ int main(){
     printf("Applying the Runge-Kutta method to the RC circuit with constant input voltage E = %.2f V\n", E);
 
     runge_kutta_2(t,u); 
-    gnu_plot(); 
+    gnu_plot2(); 
 
     return 0; 
 }
