@@ -1,6 +1,15 @@
-#define R          100.0    // resistance R [Ohms]
-#define C          0.001  // capacitance C [F]
-#define E          5.0    // constant input voltage E [V] 
-#define DT         0.001   // time step delta  
-#define NUM_STEPS  500      // number of steps 
+#ifndef RC_INPUT_DATA_H
+#define RC_INPUT_DATA_H
 
+// Include constants header
+#include "rc_constants.h"
+
+// Function declarations
+void runge_kutta3(double *t, double *u);
+void runge_kutta4(double *t, double *u);
+void gnu_plot2(void);
+void gnu_plot3(void);
+void gnu_plot4(void);
+void gnu_plt(void);
+
+#endif

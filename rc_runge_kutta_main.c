@@ -1,21 +1,47 @@
 #include <stdio.h>
+#include "rc_constants.h"
 #include "rc_input_data.h"
-#include "rc_input_data.c"
-
+//#include "rc_input_data.c"
+void euler(double t[], double u[]);
+void runge_kutta2(double t[], double u[]);
+void runge_kutta3(double t[], double u[]);
+void runge_kutta4(double t[], double u[]);
+void gnu_plot1(void);
+void gnu_plot2(void);
+void gnu_plot3(void);
+void gnu_plot4(void);
 void gnu_plt();
 
 int main(){
 
-    double t[NUM_STEPS];
-    double u[NUM_STEPS];
+    double t1[NUM_STEPS];
+    double u1[NUM_STEPS];
+    double t2[NUM_STEPS];
+    double u2[NUM_STEPS];
+    double t3[NUM_STEPS];
+    double u3[NUM_STEPS];
+    double t4[NUM_STEPS];
+    double u4[NUM_STEPS];
 
-    t[0] = 0.0; 
-    u[0] = 0.0; 
+    t1[0] = 0.0; 
+    u1[0] = 0.0; 
+    t2[0] = 0.0; 
+    u2[0] = 0.0; 
+    t3[0] = 0.0; 
+    u3[0] = 0.0; 
+    t4[0] = 0.0; 
+    u4[0] = 0.0; 
+   
 
-    rk4(t, u); 
+    euler(t1,u1);
+    runge_kutta2(t2, u2);
+    runge_kutta3(t3, u3);
+    runge_kutta4(t4, u4); 
 
-    euler(t,u);
-    gnu_plt();
+    gnu_plot1();
+    gnu_plot2();
+    gnu_plot3();
+    gnu_plot4();
 
     return 0; 
 }

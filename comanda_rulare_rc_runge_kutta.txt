@@ -1,0 +1,4 @@
+gcc -o simulare_program rc_runge_kutta_main.c rc_input_data.c
+./simulare_program
+
+

@@ -19,8 +19,13 @@ void read_column(const char *filename, double *column_data) {
 }
 
 void calculate_error(const double *data1, const double *data2, double *error) {
+
     for (int i = 0; i < NUM_STEPS; i++) {
-        error[i] = data1[i] - data2[i];
+        if (data2[i] != 0) {
+            error[i] = ((data1[i] - data2[i]) / data2[i]) * 100.0; // Calculate error percentage
+        } else {
+            error[i] = 0; // Avoid division by zero
+        }
     }
 }
 
@@ -42,8 +47,8 @@ int main() {
     double data1[NUM_STEPS], data2[NUM_STEPS], error[NUM_STEPS];
 
     // Read column 2 from two files
-    read_column("euler_data_x.txt", data1);
-    read_column("runge_kutta_4_data.txt", data2);
+    read_column("d1_euler_output_data.txt", data1);
+    read_column("d4_rk4_output_data.txt", data2);
 
     // Calculate the error between the two datasets
     calculate_error(data1, data2, error);
@@ -61,9 +66,9 @@ int main() {
     fprintf(gnuplotPipe, "set terminal png\n");
     fprintf(gnuplotPipe, "set output 'error_plot.png'\n");
     fprintf(gnuplotPipe, "set grid\n");
-    fprintf(gnuplotPipe, "set title 'Error between RK2 and RK4'\n");
+    fprintf(gnuplotPipe, "set title 'Error between Euler and RK4'\n");
     fprintf(gnuplotPipe, "set xlabel 'Index'\n");
-    fprintf(gnuplotPipe, "set ylabel 'Error'\n");
+    fprintf(gnuplotPipe, "set ylabel 'Error percentage'\n");
     fprintf(gnuplotPipe, "plot 'error_data.txt' using 1:2 with lines linewidth 2 linecolor rgb 'blue' title 'Error'\n");
 
     fflush(gnuplotPipe);

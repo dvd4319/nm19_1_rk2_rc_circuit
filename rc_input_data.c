@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include "rc_input_data.h"
-
+#include "rc_constants.h"
 
 double derivative(double u) {
     double tau = R*C; 
-    return (E - u) / tau; // differential equation of the RC circuit
+    return (E - u) / tau; 
 }
 
+// ===================== EULER METHOD ================= //
 void euler(double t[], double u[]){
     FILE *fp_euler = NULL;
-    fp_euler = fopen("euler_data_x.txt","w");
+    fp_euler = fopen("d1_euler_output_data.txt","w");
     if(fp_euler == NULL){
 
         printf("Error opening the file");
@@ -24,11 +25,40 @@ void euler(double t[], double u[]){
     }
 }
 
-// Runge-Kutta method of second order for solving the differential equation
-void runge_kutta_2(double t[], double u[]){
+void gnu_plot1(){
+    // ======== GNU PLOT ======================== // 
+
+    FILE  *gnuplotPipe = NULL; 
+    // Șterge fișierul .png existent înainte de a crea unul nou
+    remove("d1_euler_plot.png");
+    gnuplotPipe = popen("gnuplot -persist", "w");
+
+    if(gnuplotPipe == NULL){
+        printf("Error opening GNUPLOT");
+        return; 
+    }
+
+    fprintf(gnuplotPipe, "set terminal png\n");
+    fprintf(gnuplotPipe, "set output 'd1_euler_plot.png'\n");
+    fprintf(gnuplotPipe, "set grid\n");
+    fprintf(gnuplotPipe, "set title 'Behaviour of voltage across the capacitor '\n");
+    fprintf(gnuplotPipe, "set xlabel 't [s]'\n");
+    fprintf(gnuplotPipe, "set ylabel 'u_C [V]'\n");
+    fprintf(gnuplotPipe, "set label 'Euler method' at 3, 3\n");
+
+    fprintf(gnuplotPipe, "plot 'd1_euler_output_data.txt' using 1:2 with lines linewidth 2 linecolor rgb 'red'\n"); 
+
+    fflush(gnuplotPipe);
+    fprintf(gnuplotPipe, "exit\n");
+    pclose(gnuplotPipe);
+}
+
+// ===================== RUNGE KUTTA 2 METHOD ================= //
+void runge_kutta2(double t[], double u[]){
 
     FILE *fp = NULL; 
-    fp = fopen("runge_kutta_2_data.txt", "w");
+    remove("d1_euler_plot.png");
+    fp = fopen("d2_rk2_output_data.txt", "w");
     if (fp == NULL){
         printf("Error opening the file");
         return; 
@@ -53,10 +83,39 @@ void runge_kutta_2(double t[], double u[]){
     fclose(fp);
 }
 
+void gnu_plot2(){
+    // ======== GNU PLOT ======================== // 
+
+    FILE  *gnuplotPipe = NULL; 
+    remove("d2_rk2_plot.png");
+    gnuplotPipe = popen("gnuplot -persist", "w");
+
+    if(gnuplotPipe == NULL){
+        printf("Error opening GNUPLOT");
+        return; 
+    }
+
+    fprintf(gnuplotPipe, "set terminal png\n");
+    fprintf(gnuplotPipe, "set output 'd2_rk2_plot.png'\n");
+    fprintf(gnuplotPipe, "set grid\n");
+    fprintf(gnuplotPipe, "set title 'Behaviour of voltage across the capacitor '\n");
+    fprintf(gnuplotPipe, "set xlabel 't [s]'\n");
+    fprintf(gnuplotPipe, "set ylabel 'u_C [V]'\n");
+    fprintf(gnuplotPipe, "set label 'RK2 method' at 3, 3\n");
+
+    fprintf(gnuplotPipe, "plot 'd2_rk2_output_data.txt' using 1:2 with lines linewidth 2 linecolor rgb 'red'\n"); 
+
+    fflush(gnuplotPipe);
+    fprintf(gnuplotPipe, "exit\n");
+    pclose(gnuplotPipe);
+}
+
+// ===================== RUNGE KUTTA 3 METHOD ================= //
 void runge_kutta3(double t[], double u[]){
     double u_next; 
     FILE *fp3 = NULL; 
-    fp3 = fopen("runge_kutta_3_data_y.txt", "w");
+    remove("d1_euler_plot.png");
+    fp3 = fopen("d3_rk3_output_data.txt", "w");
     if(fp3 == NULL){
 
         printf("Error opening the file RK 3");
@@ -81,11 +140,39 @@ void runge_kutta3(double t[], double u[]){
     fclose(fp3);
 }
 
+void gnu_plot3(){
+    // ============= GNU PLOT  ============== // 
 
-void rk4(double t[], double u[]){
+    FILE  *gnuplotPipe = NULL; 
+    remove("d3_rk3_plot.png");
+    gnuplotPipe = popen("gnuplot -persist","w");
+
+    if(gnuplotPipe == NULL){
+        printf("Error opening GNU PLOT");
+        return;
+    }
+
+    fprintf(gnuplotPipe, "set terminal png\n");
+    fprintf(gnuplotPipe, "set output 'd3_rk3_plot.png'\n");
+    fprintf(gnuplotPipe, "set grid\n");
+    fprintf(gnuplotPipe, "set title 'Behaviour of voltage across the capacitor '\n");
+    fprintf(gnuplotPipe, "set xlabel 't[s]'\n");
+    fprintf(gnuplotPipe, "set ylabel 'u_C[V]'\n");
+    fprintf(gnuplotPipe, "set label 'RK3 method' at 3, 3\n");
+
+
+    fprintf(gnuplotPipe, "plot 'd3_rk3_output_data.txt' using 1:2 with lines linewidth 2 linecolor rgb 'red'\n");
+
+    fflush(gnuplotPipe);
+    fprintf(gnuplotPipe, "exit\n");
+    pclose(gnuplotPipe);
+}
+
+// ===================== RUNE KUTTA 4 METHOD ================= //
+void runge_kutta4(double t[], double u[]){
     double u_next; 
     FILE *fp = NULL; 
-        fp = fopen("runge_kutta_4_data_x.txt", "w");
+        fp = fopen("d4_rk4_output_data.txt", "w");
         if(fp == NULL){
 
             printf("Error opening the file");
@@ -111,10 +198,11 @@ void rk4(double t[], double u[]){
         fclose(fp);
 }
 
-void gnu_plot2(){
+void gnu_plot4(){
     // ======== GNU PLOT ======================== // 
 
     FILE  *gnuplotPipe = NULL; 
+    remove("d4_rk4_plot.png");
     gnuplotPipe = popen("gnuplot -persist", "w");
 
     if(gnuplotPipe == NULL){
@@ -123,42 +211,14 @@ void gnu_plot2(){
     }
 
     fprintf(gnuplotPipe, "set terminal png\n");
-    fprintf(gnuplotPipe, "set output 'rc_rk2_plot_x.png'\n");
+    fprintf(gnuplotPipe, "set output 'd4_rk4_plot.png'\n");
     fprintf(gnuplotPipe, "set grid\n");
     fprintf(gnuplotPipe, "set title 'Behaviour of voltage across the capacitor '\n");
     fprintf(gnuplotPipe, "set xlabel 't [s]'\n");
     fprintf(gnuplotPipe, "set ylabel 'u_C [V]'\n");
-    fprintf(gnuplotPipe, "set label 'RK2 method' at 3, 3\n");
+    fprintf(gnuplotPipe, "set label 'RK4 method' at 3, 3\n");
 
-    fprintf(gnuplotPipe, "plot 'runge_kutta_2_data.txt' using 1:2 with lines linewidth 2 linecolor rgb 'green'\n"); 
-
-    fflush(gnuplotPipe);
-    fprintf(gnuplotPipe, "exit\n");
-    pclose(gnuplotPipe);
-}
-
-void gnu_plot3(){
-    // ============= GNU PLOT  ============== // 
-
-    FILE  *gnuplotPipe = NULL; 
-
-    gnuplotPipe = popen("gnuplot -persist","w");
-
-    if(gnuplotPipe == NULL){
-        printf("Error opening GNU PLOT");
-        return;
-    }
-
-    fprintf(gnuplotPipe, "set terminal png\n");
-    fprintf(gnuplotPipe, "set output 'rc_rk3_plot1.png'\n");
-    fprintf(gnuplotPipe, "set grid\n");
-    fprintf(gnuplotPipe, "set title 'Behaviour of voltage across the capacitor '\n");
-    fprintf(gnuplotPipe, "set xlabel 't[s]'\n");
-    fprintf(gnuplotPipe, "set ylabel 'u_C[V]'\n");
-    fprintf(gnuplotPipe, "set label 'RK3 method' at 3, 3\n");
-
-
-    fprintf(gnuplotPipe, "plot 'runge_kutta_3_data_y.txt' using 1:2 with lines linewidth 2 linecolor rgb 'red'\n");
+    fprintf(gnuplotPipe, "plot 'd4_rk4_output_data.txt' using 1:2 with lines linewidth 2 linecolor rgb 'magenta'\n"); 
 
     fflush(gnuplotPipe);
     fprintf(gnuplotPipe, "exit\n");
